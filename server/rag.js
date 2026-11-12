@@ -46,7 +46,7 @@ export async function answer({ message, language, history = [] }, onDelta) {
   const stream = await ai.models.generateContentStream({
     model: config.chatModel,
     contents,
-    config: { systemInstruction: systemPrompt(language), temperature: 0.2 },
+    config: { systemInstruction: systemPrompt(language), temperature: 0.45 },
   });
 
   // Buffer the beginning to detect the NO_ANSWER sentinel before streaming to the user.

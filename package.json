@@ -5,6 +5,7 @@
   "main": "index.js",
   "scripts": {
     "test": "node scripts/eval.js",
+    "test:security": "node scripts/security-test.js",
     "ingest": "node scripts/ingest.js",
     "dev": "node --watch server/index.js",
     "start": "node server/index.js"

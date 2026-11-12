@@ -8,6 +8,38 @@ requireKey();
 loadIndex();
 
 const app = express();
+
+// Security Middleware: Clickjacking & XSS Protection
+app.disable('x-powered-by');
+app.use((req, res, next) => {
+  // 1. Anti-Clickjacking: Strictly prevent any website from embedding this app in an iframe
+  res.setHeader('X-Frame-Options', 'DENY');
+
+  // 2. Content-Security-Policy (CSP): Modern multi-layer protection against XSS and Clickjacking
+  res.setHeader(
+    'Content-Security-Policy',
+    "default-src 'self'; " +
+      "script-src 'self'; " +
+      "style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; " +
+      "font-src 'self' https://fonts.gstatic.com; " +
+      "connect-src 'self'; " +
+      "img-src 'self' data:; " +
+      "frame-ancestors 'none'; " +
+      "object-src 'none'; " +
+      "base-uri 'self'; " +
+      "form-action 'self';"
+  );
+
+  // 3. Prevent MIME-sniffing exploits
+  res.setHeader('X-Content-Type-Options', 'nosniff');
+
+  // 4. Referrer & Permissions Policy
+  res.setHeader('Referrer-Policy', 'strict-origin-when-cross-origin');
+  res.setHeader('Permissions-Policy', 'camera=(), microphone=(), geolocation=()');
+
+  next();
+});
+
 app.use(express.json({ limit: '200kb' }));
 app.use(express.static(path.join(ROOT, 'public')));
 

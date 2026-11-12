@@ -42,8 +42,24 @@ els.newChat.onclick = () => {
   state.history = []; els.messages.innerHTML = ''; els.welcome.hidden = false; els.input.focus();
 };
 
-// ---------- Minimal safe Markdown ----------
-const esc = (s) => s.replace(/[&<>"']/g, (c) => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]));
+// ---------- Minimal safe Markdown with robust HTML entity escaping & XSS disarm ----------
+const esc = (s) =>
+  String(s ?? '')
+    // Disarm any javascript: or vbscript: or data: URL pseudo-protocols
+    .replace(/(?:java|vb)script\s*:/gi, 'blocked-protocol:')
+    .replace(/data\s*:\s*text\/html/gi, 'blocked-protocol:')
+    // Disarm HTML inline event attributes (e.g., onerror=, onload=, onclick=)
+    .replace(/\b(on[a-z]{3,})\s*=/gi, 'data-blocked-$1=')
+    // Escape all dangerous HTML characters to strict entity representations
+    .replace(/[&<>"'`/]/g, (c) => ({
+      '&': '&amp;',
+      '<': '&lt;',
+      '>': '&gt;',
+      '"': '&quot;',
+      "'": '&#39;',
+      '/': '&#x2F;',
+      '`': '&#x60;',
+    }[c]));
 function inline(s) {
   return s
     .replace(/`([^`]+)`/g, '<code>$1</code>')
